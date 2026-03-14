@@ -1,0 +1,326 @@
+-- ============================
+--   TABLAS DE CATALOGO
+-- ============================
+
+CREATE TABLE categoria_egreso (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE categoria_ingreso (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE fondo_inversion (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    tipo VARCHAR(50),
+    descripcion TEXT
+);
+
+-- ============================
+--   PRESUPUESTO MENSUAL
+-- ============================
+
+CREATE TABLE presupuesto_mensual (
+    id SERIAL PRIMARY KEY,
+    anio INT NOT NULL,
+    mes INT NOT NULL CHECK (mes BETWEEN 1 AND 12),
+    monto NUMERIC(12,2) NOT NULL,
+    UNIQUE(anio, mes)
+);
+
+-- ============================
+--   EGRESOS
+-- ============================
+
+CREATE TABLE egreso (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL,
+    monto NUMERIC(12,2) NOT NULL,
+    categoria_id INT NOT NULL REFERENCES categoria_egreso(id),
+    presupuesto_id INT NOT NULL REFERENCES presupuesto_mensual(id),
+    descripcion TEXT
+);
+
+-- ============================
+--   FACTURAS DE EGRESO
+-- ============================
+
+CREATE TABLE factura (
+    id SERIAL PRIMARY KEY,
+    egreso_id INT NOT NULL REFERENCES egreso(id),
+    folio VARCHAR(100) NOT NULL,
+    proveedor VARCHAR(150),
+    fecha_emision DATE NOT NULL
+);
+
+-- ============================
+--   INGRESOS
+-- ============================
+
+CREATE TABLE ingreso (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL,
+    monto NUMERIC(12,2) NOT NULL,
+    categoria_id INT NOT NULL REFERENCES categoria_ingreso(id),
+    fondo_id INT REFERENCES fondo_inversion(id),
+    descripcion TEXT
+);
+
+
+
+Script de datos a llenar 
+
+
+-- ============================
+--   CATEGORÍAS
+-- ============================
+
+INSERT INTO categoria_egreso (nombre, descripcion) VALUES
+('Alimentación', 'Gastos de comida y supermercado'),
+('Transporte', 'Gasolina, Uber, transporte público'),
+('Servicios', 'Luz, agua, internet'),
+('Entretenimiento', 'Cine, salidas, hobbies'),
+('Salud', 'Medicinas, consultas');
+
+INSERT INTO categoria_ingreso (nombre, descripcion) VALUES
+('Salario', 'Pago mensual de empleo'),
+('Freelance', 'Proyectos independientes'),
+('Rendimientos', 'Intereses o ganancias de inversión'),
+('Regalos', 'Ingresos no recurrentes');
+
+-- ============================
+--   FONDOS DE INVERSIÓN
+-- ============================
+
+INSERT INTO fondo_inversion (nombre, tipo, descripcion) VALUES
+('Fondo Emergencias', 'Ahorro', 'Fondo para imprevistos'),
+('Fondo Inversion ETF', 'Inversión', 'ETF diversificado'),
+('Fondo Cripto', 'Inversión', 'Criptomonedas de bajo riesgo'),
+('Fondo Educación', 'Ahorro', 'Ahorro para educación');
+
+-- ============================
+--   PRESUPUESTO MENSUAL
+-- ============================
+
+INSERT INTO presupuesto_mensual (anio, mes, monto) VALUES
+(2026, 1, 25000),
+(2026, 2, 25000),
+(2026, 3, 25000);
+
+-- ============================
+--   EGRESOS
+-- ============================
+
+INSERT INTO egreso (fecha, monto, categoria_id, presupuesto_id, descripcion) VALUES
+('2026-01-03', 850, 1, 1, 'Supermercado semanal'),
+('2026-01-05', 300, 2, 1, 'Taxi aeropuerto'),
+('2026-01-10', 1200, 3, 1, 'Pago de luz'),
+('2026-02-02', 950, 1, 2, 'Supermercado'),
+('2026-02-15', 450, 4, 2, 'Cine y cena'),
+('2026-03-01', 600, 5, 3, 'Medicinas');
+
+-- ============================
+--   FACTURAS
+-- ============================
+
+INSERT INTO factura (egreso_id, folio, proveedor, fecha_emision) VALUES
+(1, 'FAC-001', 'Supermercado Aurrera', '2026-01-03'),
+(3, 'FAC-002', 'CFE', '2026-01-10'),
+(6, 'FAC-003', 'Farmacias Guadalajara', '2026-03-01');
+
+-- ============================
+--   INGRESOS
+-- ============================
+
+INSERT INTO ingreso (fecha, monto, categoria_id, fondo_id, descripcion) VALUES
+('2026-01-01', 30000, 1, 1, 'Pago mensual'),
+('2026-01-15', 5000, 2, 2, 'Proyecto freelance'),
+('2026-02-01', 30000, 1, 1, 'Pago mensual'),
+('2026-02-20', 800, 3, 2, 'Rendimientos ETF'),
+('2026-03-01', 30000, 1, 4, 'Pago mensual');
+
+
+----------------------- Reportes que se deben de utilizar -------------------------------
+
+CREATE VIEW vw_egresos_por_mes_categoria AS
+SELECT
+    pm.anio,
+    pm.mes,
+    ce.nombre AS categoria_egreso,
+    SUM(e.monto) AS total_egresos
+FROM egreso e
+JOIN categoria_egreso ce ON e.categoria_id = ce.id
+JOIN presupuesto_mensual pm ON e.presupuesto_id = pm.id
+GROUP BY pm.anio, pm.mes, ce.nombre
+ORDER BY pm.anio, pm.mes, ce.nombre;
+
+------------------------Reporte por mes _ Fondos 
+
+CREATE VIEW vw_ingresos_por_mes_categoria_fondo AS
+SELECT
+    EXTRACT(YEAR FROM i.fecha) AS anio,
+    EXTRACT(MONTH FROM i.fecha) AS mes,
+    ci.nombre AS categoria_ingreso,
+    fi.nombre AS fondo,
+    SUM(i.monto) AS total_ingresos
+FROM ingreso i
+JOIN categoria_ingreso ci ON i.categoria_id = ci.id
+LEFT JOIN fondo_inversion fi ON i.fondo_id = fi.id
+GROUP BY anio, mes, ci.nombre, fi.nombre
+ORDER BY anio, mes, ci.nombre, fi.nombre;
+
+-------------------------------------------------------- presupuesto vs egreso  
+
+CREATE VIEW vw_presupuesto_vs_egresos AS
+SELECT
+    pm.id AS presupuesto_id,
+    pm.anio,
+    pm.mes,
+    pm.monto AS presupuesto_mensual,
+    COALESCE(SUM(e.monto), 0) AS total_egresos,
+    pm.monto - COALESCE(SUM(e.monto), 0) AS saldo_disponible
+FROM presupuesto_mensual pm
+LEFT JOIN egreso e ON e.presupuesto_id = pm.id
+GROUP BY pm.id, pm.anio, pm.mes, pm.monto
+ORDER BY pm.anio, pm.mes;
+
+------------------------------------------------------- ingresos mandados a cada fondo 
+
+CREATE VIEW vw_ingresos_por_fondo AS
+SELECT
+    fi.id AS fondo_id,
+    fi.nombre AS fondo,
+    fi.tipo,
+    SUM(i.monto) AS total_asignado
+FROM fondo_inversion fi
+LEFT JOIN ingreso i ON i.fondo_id = fi.id
+GROUP BY fi.id, fi.nombre, fi.tipo
+ORDER BY fi.nombre;
+
+------------------------------------------------------- Auditoria de egresos con factura 
+
+CREATE VIEW vw_egresos_facturados AS
+SELECT
+    e.id AS egreso_id,
+    e.fecha,
+    e.monto,
+    ce.nombre AS categoria_egreso,
+    pm.anio,
+    pm.mes,
+    f.id AS factura_id,
+    f.folio,
+    f.proveedor,
+    f.fecha_emision
+FROM egreso e
+JOIN categoria_egreso ce ON e.categoria_id = ce.id
+JOIN presupuesto_mensual pm ON e.presupuesto_id = pm.id
+LEFT JOIN factura f ON f.egreso_id = e.id
+ORDER BY e.fecha, e.id;
+
+------------------------------------------------------------- function para evitar que  se exceda el presupuesto 
+
+CREATE OR REPLACE FUNCTION fn_validar_presupuesto_egreso()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_presupuesto NUMERIC(12,2);
+    v_total_egresos NUMERIC(12,2);
+BEGIN
+    SELECT monto INTO v_presupuesto
+    FROM presupuesto_mensual
+    WHERE id = NEW.presupuesto_id;
+
+    SELECT COALESCE(SUM(monto), 0) INTO v_total_egresos
+    FROM egreso
+    WHERE presupuesto_id = NEW.presupuesto_id
+      AND id <> COALESCE(NEW.id, -1);
+
+    IF (v_total_egresos + NEW.monto) > v_presupuesto THEN
+        RAISE EXCEPTION 'El egreso excede el presupuesto mensual (presupuesto: %, acumulado: %, nuevo egreso: %)',
+            v_presupuesto, v_total_egresos, NEW.monto;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+------------------------------------------------------------  trigger sobre egreso 
+
+CREATE TRIGGER trg_validar_presupuesto_egreso
+BEFORE INSERT OR UPDATE ON egreso
+FOR EACH ROW
+EXECUTE FUNCTION fn_validar_presupuesto_egreso();
+
+------------------------------------------------------------  para obtener el resumen financiero mensual  
+
+CREATE OR REPLACE FUNCTION sp_resumen_financiero_mensual(p_anio INT, p_mes INT)
+RETURNS TABLE (
+    anio INT,
+    mes INT,
+    presupuesto NUMERIC(12,2),
+    total_egresos NUMERIC(12,2),
+    saldo_disponible NUMERIC(12,2),
+    total_ingresos NUMERIC(12,2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        pm.anio,
+        pm.mes,
+        pm.monto AS presupuesto,
+        COALESCE(SUM(DISTINCT e.monto), 0) AS total_egresos,
+        pm.monto - COALESCE(SUM(DISTINCT e.monto), 0) AS saldo_disponible,
+        COALESCE((
+            SELECT SUM(i.monto)
+            FROM ingreso i
+            WHERE EXTRACT(YEAR FROM i.fecha) = p_anio
+              AND EXTRACT(MONTH FROM i.fecha) = p_mes
+        ), 0) AS total_ingresos
+    FROM presupuesto_mensual pm
+    LEFT JOIN egreso e ON e.presupuesto_id = pm.id
+    WHERE pm.anio = p_anio
+      AND pm.mes = p_mes
+    GROUP BY pm.anio, pm.mes, pm.monto;
+END;
+$$ LANGUAGE plpgsql;
+
+--------------------------------------------------------------- Listar movimientos de fondo mensual 
+CREATE OR REPLACE FUNCTION sp_movimientos_fondo(p_fondo_id INT)
+RETURNS TABLE (
+    ingreso_id INT,
+    fecha DATE,
+    monto NUMERIC(12,2),
+    categoria VARCHAR,
+    fondo VARCHAR
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        i.id,
+        i.fecha,
+        i.monto,
+        ci.nombre,
+        fi.nombre
+    FROM ingreso i
+    JOIN categoria_ingreso ci ON i.categoria_id = ci.id
+    JOIN fondo_inversion fi ON i.fondo_id = fi.id
+    WHERE fi.id = p_fondo_id
+    ORDER BY i.fecha;
+END;
+$$ LANGUAGE plpgsql;
+
+--------------------------------------------------------- diagrama ER 
+
+presupuesto_mensual (id) ──< egreso (presupuesto_id)
+categoria_egreso (id)   ──< egreso (categoria_id)
+egreso (id)             ──< factura (egreso_id)
+
+categoria_ingreso (id)  ──< ingreso (categoria_id)
+fondo_inversion (id)    ──< ingreso (fondo_id)
+
+--------------------------------------------------------- 
+
