@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Presupuesto Personal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-wallet me-2"></i>Gestor de Presupuesto
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" data-section="dashboard">
+                            <i class="fas fa-chart-pie me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#ingresos" data-section="ingresos">
+                            <i class="fas fa-arrow-up text-success me-1"></i>Ingresos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#egresos" data-section="egresos">
+                            <i class="fas fa-arrow-down text-danger me-1"></i>Gastos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#presupuestos" data-section="presupuestos">
+                            <i class="fas fa-target me-1"></i>Presupuestos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#inversiones" data-section="inversiones">
+                            <i class="fas fa-chart-line me-1"></i>Inversiones
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">
+                        <i class="fas fa-chart-pie me-2"></i>Dashboard Financiero
+                    </h2>
+                </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Ingresos del Mes</h6>
+                                    <h3 id="total-ingresos">$0.00</h3>
+                                </div>
+                                <i class="fas fa-arrow-up fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Gastos del Mes</h6>
+                                    <h3 id="total-egresos">$0.00</h3>
+                                </div>
+                                <i class="fas fa-arrow-down fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Presupuesto Actual</h6>
+                                    <h3 id="presupuesto-actual">$0.00</h3>
+                                </div>
+                                <i class="fas fa-target fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Balance</h6>
+                                    <h3 id="balance">$0.00</h3>
+                                </div>
+                                <i class="fas fa-balance-scale fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Distribución de Gastos</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="gastos-chart" style="height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Tendencia Mensual</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="tendencia-chart" style="height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ingresos Section -->
+        <section id="ingresos" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">
+                        <i class="fas fa-arrow-up text-success me-2"></i>Gestión de Ingresos
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nuevo Ingreso</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-ingreso">
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="ingreso-fecha" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto</label>
+                                    <input type="number" class="form-control" id="ingreso-monto" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Categoría</label>
+                                    <select class="form-select" id="ingreso-categoria" required>
+                                        <option value="">Seleccione una categoría</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Fuente</label>
+                                    <input type="text" class="form-control" id="ingreso-fuente" placeholder="Ej: Salario, Freelance, etc.">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Estado</label>
+                                    <select class="form-select" id="ingreso-estado">
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="recibido">Recibido</option>
+                                        <option value="cancelado">Cancelado</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Guardar Ingreso
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Lista de Ingresos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tabla-ingresos">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Monto</th>
+                                            <th>Categoría</th>
+                                            <th>Fuente</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Egresos Section -->
+        <section id="egresos" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">
+                        <i class="fas fa-arrow-down text-danger me-2"></i>Gestión de Gastos
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nuevo Gasto</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-egreso">
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="egreso-fecha" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto</label>
+                                    <input type="number" class="form-control" id="egreso-monto" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Categoría</label>
+                                    <select class="form-select" id="egreso-categoria" required>
+                                        <option value="">Seleccione una categoría</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="egreso-descripcion" rows="2"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Método de Pago</label>
+                                    <select class="form-select" id="egreso-metodo">
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="tarjeta">Tarjeta</option>
+                                        <option value="transferencia">Transferencia</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Estado</label>
+                                    <select class="form-select" id="egreso-estado">
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="pagado">Pagado</option>
+                                        <option value="cancelado">Cancelado</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-save me-1"></i>Guardar Gasto
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Lista de Gastos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tabla-egresos">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Monto</th>
+                                            <th>Categoría</th>
+                                            <th>Descripción</th>
+                                            <th>Método</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Presupuestos Section -->
+        <section id="presupuestos" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">
+                        <i class="fas fa-target me-2"></i>Gestión de Presupuestos
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nuevo Presupuesto</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-presupuesto">
+                                <div class="mb-3">
+                                    <label class="form-label">Año</label>
+                                    <input type="number" class="form-control" id="presupuesto-anio" min="2020" max="2030" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mes</label>
+                                    <select class="form-select" id="presupuesto-mes" required>
+                                        <option value="">Seleccione un mes</option>
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto Presupuestado</label>
+                                    <input type="number" class="form-control" id="presupuesto-monto" step="0.01" required>
+                                </div>
+                                <button type="submit" class="btn btn-info text-white">
+                                    <i class="fas fa-save me-1"></i>Guardar Presupuesto
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Presupuestos Mensuales</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tabla-presupuestos">
+                                    <thead>
+                                        <tr>
+                                            <th>Mes/Año</th>
+                                            <th>Presupuesto</th>
+                                            <th>Gastos Reales</th>
+                                            <th>Diferencia</th>
+                                            <th>% Uso</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inversiones Section -->
+        <section id="inversiones" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">
+                        <i class="fas fa-chart-line me-2"></i>Gestión de Inversiones
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nuevo Fondo de Inversión</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-fondo">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del Fondo</label>
+                                    <input type="text" class="form-control" id="fondo-nombre" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo</label>
+                                    <select class="form-select" id="fondo-tipo">
+                                        <option value="acciones">Acciones</option>
+                                        <option value="bonos">Bonos</option>
+                                        <option value="mixto">Mixto</option>
+                                        <option value="indexado">Indexado</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="fondo-descripcion" rows="2"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Guardar Fondo
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Fondos de Inversión</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tabla-fondos">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Tipo</th>
+                                            <th>Descripción</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
