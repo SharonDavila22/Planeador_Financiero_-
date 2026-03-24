@@ -1,0 +1,44 @@
+models.py
+
+from django.db import models
+
+class CategoriaEgreso(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+class CategoriaIngreso(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+class FondoInversion(models.Model):
+    nombre = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=50, blank=True, null=True)
+    descripcion = models.TextField(blank=True, null=True)
+
+class PresupuestoMensual(models.Model):
+    anio = models.IntegerField()
+    mes = models.IntegerField()
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        unique_together = ('anio', 'mes')
+
+class Egreso(models.Model):
+    fecha = models.DateField()
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    categoria = models.ForeignKey(CategoriaEgreso, on_delete=models.PROTECT)
+    presupuesto = models.ForeignKey(PresupuestoMensual, on_delete=models.PROTECT)
+    descripcion = models.TextField(blank=True, null=True)
+
+class Factura(models.Model):
+    egreso = models.OneToOneField(Egreso, on_delete=models.CASCADE)
+    folio = models.CharField(max_length=100)
+    proveedor = models.CharField(max_length=150, blank=True, null=True)
+    fecha_emision = models.DateField()
+
+class Ingreso(models.Model):
+    fecha = models.DateField()
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    categoria = models.ForeignKey(CategoriaIngreso, on_delete=models.PROTECT)
+    fondo = models.ForeignKey(FondoInversion, on_delete=models.SET_NULL, null=True, blank=True)
+    descripcion = models.TextField(blank=True, null=True)

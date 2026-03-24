@@ -1,0 +1,39 @@
+views.py 
+
+from rest_framework import viewsets
+from .models import (
+    CategoriaEgreso, CategoriaIngreso, FondoInversion,
+    PresupuestoMensual, Egreso, Factura, Ingreso
+)
+from .serializers import (
+    CategoriaEgresoSerializer, CategoriaIngresoSerializer, FondoInversionSerializer,
+    PresupuestoMensualSerializer, EgresoSerializer, FacturaSerializer, IngresoSerializer
+)
+
+class CategoriaEgresoViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaEgreso.objects.all()
+    serializer_class = CategoriaEgresoSerializer
+
+class CategoriaIngresoViewSet(viewsets.ModelViewSet):
+    queryset = CategoriaIngreso.objects.all()
+    serializer_class = CategoriaIngresoSerializer
+
+class FondoInversionViewSet(viewsets.ModelViewSet):
+    queryset = FondoInversion.objects.all()
+    serializer_class = FondoInversionSerializer
+
+class PresupuestoMensualViewSet(viewsets.ModelViewSet):
+    queryset = PresupuestoMensual.objects.all()
+    serializer_class = PresupuestoMensualSerializer
+
+class EgresoViewSet(viewsets.ModelViewSet):
+    queryset = Egreso.objects.all()
+    serializer_class = EgresoSerializer
+
+class FacturaViewSet(viewsets.ModelViewSet):
+    queryset = Factura.objects.all()
+    serializer_class = FacturaSerializer
+
+class IngresoViewSet(viewsets.ModelViewSet):
+    queryset = Ingreso.objects.all()
+    serializer_class = IngresoSerializer

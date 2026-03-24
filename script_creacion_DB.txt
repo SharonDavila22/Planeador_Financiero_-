@@ -6,6 +6,9 @@ CREATE TABLE categoria_egreso (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT
+
+
+llll
 );
 
 CREATE TABLE categoria_ingreso (

@@ -1,0 +1,42 @@
+serialize.py 
+
+from rest_framework import serializers
+from .models import (
+    CategoriaEgreso, CategoriaIngreso, FondoInversion,
+    PresupuestoMensual, Egreso, Factura, Ingreso
+)
+
+class CategoriaEgresoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriaEgreso
+        fields = '__all__'
+
+class CategoriaIngresoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriaIngreso
+        fields = '__all__'
+
+class FondoInversionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FondoInversion
+        fields = '__all__'
+
+class PresupuestoMensualSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PresupuestoMensual
+        fields = '__all__'
+
+class EgresoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Egreso
+        fields = '__all__'
+
+class FacturaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Factura
+        fields = '__all__'
+
+class IngresoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingreso
+        fields = '__all__'
