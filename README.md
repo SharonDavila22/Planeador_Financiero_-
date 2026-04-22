@@ -1,6 +1,6 @@
 # Gestor de Presupuesto Personal
 
-Una aplicación web completa para la gestión de finanzas personales, desarrollada con HTML5, CSS3 y JavaScript vanilla. La aplicación permite llevar un control detallado de ingresos, gastos, presupuestos mensuales e inversiones.
+Una aplicación web completa para la gestión de finanzas personales, desarrollada con HTML5, CSS3 y JavaScript vanilla, se comunica mediante una API rest desarrollada en Django rest framework. La aplicación permite llevar un control detallado de ingresos, gastos, presupuestos mensuales e inversiones.
 
 ## 🚀 Características Principales
 
